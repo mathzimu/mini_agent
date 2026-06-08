@@ -1,0 +1,6 @@
+[project]
+name = "mini-agent"
+version = "0.1.0"
+description = "Minimal Agent Runtime from scratch using Ollama"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.31.0"]
