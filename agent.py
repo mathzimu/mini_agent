@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 import re
+import time
 from llm import LLM
 from tool import ToolRegistry
 
@@ -57,6 +58,7 @@ def run_agent(
     registry: ToolRegistry,
     user_input: str,
     messages: list[dict] | None = None,
+    verbose: bool = False,
 ) -> tuple[str, list[dict]]:
     if messages is None:
         messages = [
@@ -65,13 +67,17 @@ def run_agent(
 
     messages.append({"role": "user", "content": user_input})
 
-    for _ in range(10):
+    for turn in range(10):
+        t0 = time.time()
         response = llm.chat(messages)
+        elapsed = time.time() - t0
         content = response.get("content", "")
 
         tool_call = _extract_tool_call(content)
         if tool_call is None:
             messages.append(response)
+            if verbose:
+                print(f"  [{turn}] LLM {elapsed:.1f}s -> final answer", flush=True)
             return content, messages
 
         tool_name = tool_call.get("tool", "")
@@ -87,6 +93,12 @@ def run_agent(
                 result = tool.invoke(arguments)
             except Exception as e:
                 result = f"Error executing {tool_name}: {e}"
+
+        if verbose:
+            print(
+                f"  [{turn}] LLM {elapsed:.1f}s -> {tool_name}({arguments})",
+                flush=True,
+            )
 
         messages.append(response)
         messages.append({"role": "user", "content": f"Tool result:\n{result}"})

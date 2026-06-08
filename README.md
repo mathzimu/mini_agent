@@ -53,10 +53,25 @@ python main.py --list-tools
 
 | 参数 | 说明 |
 |------|------|
-| `--model` | Ollama 模型名 (默认: qwen3:4b) |
+| `--model` | Ollama 模型名 (默认: qwen3:4b; 更快: qwen3:1.7b, qwen2.5:1.5b) |
+| `--num-ctx` | 上下文窗口大小 (默认: 4096; 越小越快) |
 | `--workspace` | 沙箱工作区目录 (默认: ./workspace) |
 | `--list-tools` | 列出所有工具并退出 |
 | `--no-memory` | 禁用对话记忆 |
+
+## 速度优化
+
+```bash
+# ① 换更小的模型
+ollama pull qwen3:1.7b
+python main.py --model qwen3:1.7b
+
+# ② 缩小上下文窗口（减少每次推理的计算量）
+python main.py --num-ctx 2048
+
+# ③ 组合使用
+python main.py --model qwen3:1.7b --num-ctx 2048
+```
 
 ## 项目结构
 

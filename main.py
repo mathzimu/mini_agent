@@ -43,10 +43,18 @@ def main():
     parser = argparse.ArgumentParser(
         description="Mini Agent - Local Agent Runtime from scratch with Ollama"
     )
-    parser.add_argument("--model", default="qwen3:4b", help="Ollama model name")
-    parser.add_argument("--workspace", default="./workspace", help="Sandbox workspace directory")
-    parser.add_argument("--list-tools", action="store_true", help="List available tools and exit")
-    parser.add_argument("--no-memory", action="store_true", help="Disable conversation memory")
+    parser.add_argument("--model", default="qwen3:4b",
+                        help="Ollama model (default: qwen3:4b; faster: qwen3:1.7b, qwen2.5:1.5b)")
+    parser.add_argument("--num-ctx", type=int, default=4096,
+                        help="Context window size (default: 4096; smaller = faster)")
+    parser.add_argument("--workspace", default="./workspace",
+                        help="Sandbox workspace directory")
+    parser.add_argument("--list-tools", action="store_true",
+                        help="List available tools and exit")
+    parser.add_argument("--no-memory", action="store_true",
+                        help="Disable conversation memory")
+    parser.add_argument("--verbose", action="store_true",
+                        help="Show timing and debug info")
     parser.add_argument("prompt", nargs="*", help="Direct prompt (omit for interactive mode)")
     args = parser.parse_args()
 
@@ -58,12 +66,12 @@ def main():
         _print_tools(registry)
         return
 
-    llm = LLM(model=args.model)
+    llm = LLM(model=args.model, num_ctx=args.num_ctx)
 
     if args.prompt:
         prompt = " ".join(args.prompt)
         print(f">>> {prompt}\n")
-        answer, _ = run_agent(llm, registry, prompt)
+        answer, _ = run_agent(llm, registry, prompt, verbose=args.verbose)
         print(answer)
         return
 
@@ -81,7 +89,7 @@ def main():
             break
         if not prompt.strip():
             continue
-        answer, messages = run_agent(llm, registry, prompt, messages)
+        answer, messages = run_agent(llm, registry, prompt, messages, verbose=args.verbose)
         print(answer)
         print()
 
